@@ -1,0 +1,13 @@
+[
+  {"language": "java", "component": "Variables", "observation": "long is the most efficient primitive data type."},
+  {"language": "java", "component": "Variables", "observation": "Static variables consume 60% more energy as compared to instance variables."},
+  {"language": "java", "component": "Variables", "observation": "Primitive data types are much efficient than their wrapper classes."},
+  {"language": "java", "component": "Short Circuit operator", "observation": "Putting most common cases first can save up to 10% energy."},
+  {"language": "java", "component": "String", "observation": "String concatenation operator consumes less energy than StringBuilder and StringBuffer classes’ append method both at run time and compile time."},
+  {"language": "java", "component": "Loop", "observation": "int is the most energy efficient initialization variable in a for loop."},
+  {"language": "java", "component": "Loop", "observation": "Method termination expression consumes less energy than variable termination expression."},
+  {"language": "java", "component": "Exception", "observation": "Try-catch block consumes very little energy when no exception is thrown."},
+  {"language": "java", "component": "Exception", "observation": "Catch block execution has very low cost in case of an exception."},
+  {"language": "java", "component": "Exception", "observation": "Using an if condition for error checking causes higher energy consumption."},
+  {"language": "java", "component": "Array", "observation": "Array consumes 33% more energy than instance variable."}
+]

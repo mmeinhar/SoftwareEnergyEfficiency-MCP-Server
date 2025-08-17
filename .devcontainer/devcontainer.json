@@ -1,0 +1,51 @@
+{
+  "name": "Software Energy Efficiency MCP Server",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": "..",
+    "args": {
+      "USE_DB": "false"
+    }
+  },
+  "customizations": {
+    "vscode": {
+            "settings": {
+                "python.terminal.activateEnvInCurrentTerminal": true,
+                "python.defaultInterpreterPath": ".venv/bin/python",
+                "github.copilot.enable": {
+                  "*": true
+
+                  //  "*": false,
+                //  "plaintext": false,  
+                //  "markdown": false,
+                //  "scminput": false
+                 },   
+                 "workbench.startupEditor": "readme", 
+                 // Open Markdown files in preview mode by default
+                 "workbench.editorAssociations": {
+                     "*.md": "vscode.markdown.preview.editor"
+                 }
+            },
+            "extensions": [
+               "mathematic.vscode-pdf",
+               "vstirbu.vscode-mermaid-preview"
+            ],
+            "mcp": {
+              "servers": {
+                "Software-Energy-Efficiency-MCP-Server": {
+                  "type": "sse",
+                  "url": "http://localhost:8000/sse"
+                }
+              }
+            }
+        }
+  },
+  "postCreateCommand": "pip install --no-cache-dir -r requirements.txt",
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": {
+      "label": "MCP Server (SSE)",
+      "onAutoForward": "silent"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+[
+  {"language": "ide", "component": "IDEs", "observation": "IntelliJ IDEA is more energy efficient than Eclipse and Netbeans."},
+  {"language": "python", "component": "Loops", "observation": "List comprehensions are more efficient than for loops for creating lists."},
+  {"language": "python", "component": "Strings", "observation": "Use ''.join() for concatenating multiple strings instead of repeated +."},
+  {"language": "python", "component": "Data Structures", "observation": "Use sets for fast membership testing instead of lists."},
+  {"language": "python", "component": "Variables", "observation": "Avoid using global variables as they are less efficient."},
+  {"language": "python", "component": "Exceptions", "observation": "Using try-except is efficient when exceptions are rare."},
+  {"language": "javascript", "component": "Variables", "observation": "Use const for variables that don't change to enable optimizations."},
+  {"language": "javascript", "component": "Loops", "observation": "Use for loops instead of forEach for better performance."},
+  {"language": "javascript", "component": "Strings", "observation": "Use template literals for string interpolation."},
+  {"language": "javascript", "component": "Functions", "observation": "Avoid nested functions to reduce closure overhead."},
+  {"language": "javascript", "component": "DOM", "observation": "Batch DOM updates to minimize reflows."}
+]
