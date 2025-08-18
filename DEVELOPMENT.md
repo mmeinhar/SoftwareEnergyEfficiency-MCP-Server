@@ -1,6 +1,6 @@
 # Development Guide
 
-This project is developed and tested in GitHub Codespaces using a Docker container defined by the `Dockerfile` and `.devcontainer/devcontainer.json` for consistent environments. The server is written in Python and processes all (only Java currently supported) computer code as strings for energy efficiency optimizations, requiring no runtime execution of these languages.
+This project is developed and tested in GitHub Codespaces using a Docker container defined by the `Dockerfile` and `.devcontainer/devcontainer.json` for consistent environments. The server is written in Python and processes all computer languages as strings for energy efficiency optimizations, requiring no runtime execution of these languages. Current energy-efficiency datasets: Java.
 
 ## Setup in GitHub Codespaces
 1. Open the repository in Codespaces.
@@ -28,6 +28,9 @@ This project is developed and tested in GitHub Codespaces using a Docker contain
 - Tests cover the retriever with JSON mode. Qdrant tests are skipped unless `QDRANT_URL` is set.
 - To test the server’s suggestions, create code snippets (e.g., Java, Python, JavaScript files) in VSCode; the server processes them as strings without execution.
 
+## Logging
+- Change the environment variable `MCP_SERVER_LOG_LEVEL` in `.env` to `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` to set the log level.
+
 ## Build Configurations
 - Development: `USE_DB=false`, `TRANSPORT=stdio` (no Qdrant imports/installs).
 - Production: `USE_DB=true`, `TRANSPORT=sse` (build with `--build-arg USE_DB=true`, configure Qdrant env vars).
@@ -36,14 +39,9 @@ This project is developed and tested in GitHub Codespaces using a Docker contain
   docker exec <container-id> python src/migrate.py
   ```
 
-## Adding New Languages/Observations
-- Update `data/efficiency_data.json` with new entries for Java, Python, or JavaScript.
-- If using Qdrant, re-run `migrate.py` inside the container.
-- The retriever abstraction minimizes code changes for JSON-to-Qdrant migration.
+## Adding New Languages/
+- Update `data/efficiency_data.json` with new entries for multiple languages. If the dataset becomes too large for a JSON file, enable Qdrant by setting `USE_DB=true` in `.env` and run the migration script called "migrate_data_from_json_to_db.py 
 
 ## Notes
-- In development, use JSON mode (`USE_DB=false`) to avoid external dependencies.
+- In development, using JSON mode (`USE_DB=false`) has code implemented to avoid importing external database dependencies.
 - For production, deploy the container with SSE for multi-instance Copilot access.
-- The `.devcontainer/devcontainer.json` automates setup, installing VSCode extensions for Python, JavaScript, Java (for editing, not execution), and Copilot, and forwards port 8000 for SSE.
-- Java and JavaScript support is included for editing code snippets in VSCode, as the server processes these as strings sent by the MCP client (e.g., Copilot).
-- The Docker image ensures low RAM usage by computing embeddings once during initialization or migration.

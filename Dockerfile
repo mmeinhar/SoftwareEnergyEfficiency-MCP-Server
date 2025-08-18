@@ -31,4 +31,4 @@ COPY . /app
 EXPOSE 8000
 
 # Default command to run the server
-CMD ["python", "src/mcp-server.py"]
+CMD ["python", "src/mcp_server.py"]

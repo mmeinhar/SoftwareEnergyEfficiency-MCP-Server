@@ -3,4 +3,3 @@ pytest
 sentence-transformers
 numpy
 # If USE_DB=true, also run: pip install qdrant-client
-

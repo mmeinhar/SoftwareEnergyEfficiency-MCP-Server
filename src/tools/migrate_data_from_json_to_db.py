@@ -30,7 +30,7 @@ if not client.has_collection(collection_name):
     )
 
 # Load data
-data_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'efficiency_data.json')
+data_path = os.path.join(os.path.dirname(__file__), '../..', 'data', 'efficiency_data.json')
 with open(data_path, 'r') as f:
     data = json.load(f)
 

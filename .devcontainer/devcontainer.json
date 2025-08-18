@@ -2,10 +2,10 @@
   "name": "Software Energy Efficiency MCP Server",
   "build": {
     "dockerfile": "../Dockerfile",
-    "context": "..",
-    "args": {
-      "USE_DB": "false"
-    }
+    "context": ".."
+    //"args": {
+    //  "USE_DB": "false"
+    //}
   },
   "customizations": {
     "vscode": {
