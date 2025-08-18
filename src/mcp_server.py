@@ -1,9 +1,9 @@
 # File: mcp-server.py
 # Description: This is an MCP server that provides energy efficiency suggestions for
-# code snippets in multiple languages, currently Java, Python, and Javascript. Supports stdio (local) and 
-# SSE (remote) transport modes for GitHub Copilot integration. Server authentication is handled via a Bearer 
-# token loaded from a secure file.
+# code snippets in multiple languages. Supports stdio (local) and SSE (remote) transport 
+# modes. Server authentication is handled via a Bearer token loaded from a secure file.
 # 
+# See additional information on increasing software energy efficiency at: https://agile7.com/publications.
 
 import os
 from fastmcp import FastMCP
@@ -22,8 +22,8 @@ configure_logging(default_level=get_env_default("MCP_SERVER_LOG_LEVEL"))
 logger = logging.getLogger(__name__)
 
 # Function to print MCP environment variables for debugging purposes
-if logger.isEnabledFor(logging.INFO):
-    print_mcp_env_vars()
+if logger.isEnabledFor(logging.DEBUG):
+    print_mcp_env_vars(log_level="debug")
 
 # Initialize EfficiencyRetriever
 use_db_str = os.getenv("USE_DB", get_env_default("USE_DB")).lower()
@@ -33,12 +33,12 @@ retriever = EfficiencyRetriever(use_db=use_db)
 
 # Initialize FastMCP server with authentication
 mcp = FastMCP(
-    name="Software-Energy-Efficiency-MCP-Server",
+    name="Agile7-Software-Energy-Efficiency-MCP-Server",
     auth=configure_mcp_authentication()
 )
 
 @mcp.tool
-async def get_energy_efficiency_suggestions(language: str, code: str, token_data: dict = None) -> List[Dict]:
+async def optimize_energy_efficiency(language: str, code: str, token_data: dict = None) -> List[Dict]:
     """
     Retrieve suggestions to improve the energy efficiency of a code snippet.
     Requires valid authentication based on environment configuration.
@@ -58,8 +58,7 @@ async def get_energy_efficiency_suggestions(language: str, code: str, token_data
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(f"Code snippet:\n{code}")
 
-    query = code
-    results = retriever.search(query, language.lower(), top_k=10)
+    results = retriever.search(code, language.lower(), top_k=10)
     logger.info(f"Retrieved [{len(results)}] suggestions for [{language}] code snippet")
 
     if logger.isEnabledFor(logging.DEBUG):

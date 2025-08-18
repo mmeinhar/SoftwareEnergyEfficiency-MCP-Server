@@ -26,77 +26,86 @@ def get_env_default(var_name: str) -> str:
     }
     return env_defaults.get(var_name, None)
 
-def print_mcp_env_vars() -> None:
+# Function to print MCP environment variables for debugging purposes
+def print_mcp_env_vars(log_level: str = "info") -> None:
     """
     Print all FastMCP server environment variables for debugging and configuration verification.
     Shows the actual value set in the environment, or the default if unset.
+    
+    Args:
+        log_level (str): The logging level to use for output (e.g., 'debug', 'info', 'warning', 'error', 'critical'). Defaults to 'info'.
     """
     logger = logging.getLogger(__name__)
-    logger.info("\n\n=== Software-Energy-Efficiency-MCP-Server MCP Server Environment Variables ===")
     
-    env_vars = [
-        {
-            "name": "MCP_SERVER_LOG_LEVEL",
-            "description": "Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)"
-        },
-        {
-            "name": "USE_DB",
-            "description": "Set to true to use Qdrant vector DB, false for JSON"
-        },
-        {
-            "name": "TRANSPORT",
-            "description": "Transport mode: stdio for local, sse for remote"
-        },
-        {
-            "name": "QDRANT_URL",
-            "description": "Qdrant cluster URL (required if USE_DB=true)"
-        },
-        {
-            "name": "QDRANT_API_KEY",
-            "description": "Qdrant API key (required if USE_DB=true)"
-        },
-        {
-            "name": "FASTMCP_SERVER_AUTH",
-            "description": "Authentication type: JWT (production), STATIC_JWT (staging), STATIC_TOKEN (development), or none"
-        },
-        {
-            "name": "FASTMCP_SERVER_AUTH_JWT_JWKS_URI",
-            "description": "JWKS endpoint URL for JWT verification (production)"
-        },
-        {
-            "name": "FASTMCP_SERVER_AUTH_JWT_ISSUER",
-            "description": "Token issuer for JWT verification (production)"
-        },
-        {
-            "name": "FASTMCP_SERVER_AUTH_JWT_AUDIENCE",
-            "description": "Expected audience for JWT verification (production)"
-        },
-        {
-            "name": "FASTMCP_SERVER_AUTH_JWT_REQUIRED_SCOPES",
-            "description": "Comma-separated required scopes for JWT verification (production)"
-        },
-        {
-            "name": "FASTMCP_SERVER_AUTH_JWT_PUBLIC_KEY",
-            "description": "Static public key for STATIC_JWT verification (staging)"
-        },
-        {
-            "name": "FASTMCP_SERVER_AUTH_JWT_ISSUER_STATIC",
-            "description": "Token issuer for STATIC_JWT verification (staging)"
-        },
-        {
-            "name": "FASTMCP_SERVER_AUTH_JWT_AUDIENCE_STATIC",
-            "description": "Expected audience for STATIC_JWT verification (staging)"
-        },
-        {
-            "name": "FASTMCP_SERVER_AUTH_JWT_REQUIRED_SCOPES_STATIC",
-            "description": "Comma-separated required scopes for STATIC_JWT verification (staging)"
-        }
-    ]
+    # Map string log level to logging method
+    log_method = getattr(logger, log_level.lower(), logger.info)
+    
+    if logger.isEnabledFor(logging.DEBUG):
+        log_method("\n\n=== Application-Specific Environment Variables ===")
+        
+        env_vars = [
+            {
+                "name": "MCP_SERVER_LOG_LEVEL",
+                "description": "Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)"
+            },
+            {
+                "name": "USE_DB",
+                "description": "Set to true to use Qdrant vector DB, false for JSON"
+            },
+            {
+                "name": "TRANSPORT",
+                "description": "Transport mode: stdio for local, sse for remote"
+            },
+            {
+                "name": "QDRANT_URL",
+                "description": "Qdrant cluster URL (required if USE_DB=true)"
+            },
+            {
+                "name": "QDRANT_API_KEY",
+                "description": "Qdrant API key (required if USE_DB=true)"
+            },
+            {
+                "name": "FASTMCP_SERVER_AUTH",
+                "description": "Authentication type: JWT (production), STATIC_JWT (staging), STATIC_TOKEN (development), or none"
+            },
+            {
+                "name": "FASTMCP_SERVER_AUTH_JWT_JWKS_URI",
+                "description": "JWKS endpoint URL for JWT verification (production)"
+            },
+            {
+                "name": "FASTMCP_SERVER_AUTH_JWT_ISSUER",
+                "description": "Token issuer for JWT verification (production)"
+            },
+            {
+                "name": "FASTMCP_SERVER_AUTH_JWT_AUDIENCE",
+                "description": "Expected audience for JWT verification (production)"
+            },
+            {
+                "name": "FASTMCP_SERVER_AUTH_JWT_REQUIRED_SCOPES",
+                "description": "Comma-separated required scopes for JWT verification (production)"
+            },
+            {
+                "name": "FASTMCP_SERVER_AUTH_JWT_PUBLIC_KEY",
+                "description": "Static public key for STATIC_JWT verification (staging)"
+            },
+            {
+                "name": "FASTMCP_SERVER_AUTH_JWT_ISSUER_STATIC",
+                "description": "Token issuer for STATIC_JWT verification (staging)"
+            },
+            {
+                "name": "FASTMCP_SERVER_AUTH_JWT_AUDIENCE_STATIC",
+                "description": "Expected audience for STATIC_JWT verification (staging)"
+            },
+            {
+                "name": "FASTMCP_SERVER_AUTH_JWT_REQUIRED_SCOPES_STATIC",
+                "description": "Comma-separated required scopes for STATIC_JWT verification (staging)"
+            }
+        ]
 
-    for var in env_vars:
-        value = os.getenv(var["name"], get_env_default(var["name"]))
-        logger.info(f"{var['name']}={value} description=({var['description']})")
-    logger.info("==============================================================================\n\n")
+        for var in env_vars:
+            value = os.getenv(var["name"], get_env_default(var["name"]))
+            log_method(f"{var['name']}={value} description=({var['description']})")
+        log_method("============================================================\n\n")
 
 def configure_logging(default_level: int) -> None:
     """
