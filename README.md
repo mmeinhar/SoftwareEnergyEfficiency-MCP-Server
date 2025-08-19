@@ -111,9 +111,10 @@ The dataset is in `data/efficiency_data.json`. Add more observations as needed. 
 ]
 ```
 ## Acknowledgments
-This project's Java dataset in the [efficiency-data.json](https://github.com/mmeinhar/SoftwareEnergyEfficiency-MCP-Server/blob/main/data/efficiency-data.json) file uses some data from the following research papers:
+This project's Java dataset in the [efficiency-data.json](https://github.com/mmeinhar/SoftwareEnergyEfficiency-MCP-Server/blob/main/data/efficiency-data.json) file uses some data from the following academic research papers and industry publications:
 
-- [Kumar, Mohit. "Improving Energy Consumption Of Java Programs" (2019). Wayne State University Dissertations. 2325.](https://digitalcommons.wayne.edu/oa_dissertations/2325)
+- Meinhardt, Max. "[Energy-Efficiency Tactics in Software Architecture and Implementation](https://agile7.com/wp-content/uploads/Agile7_WhitePaper_EnergyEfficiencyTacticsInSoftwareArchitectureAndImplementation.pdf)" (2025).
+- [Kumar, Mohit. "[Improving Energy Consumption Of Java Programs](https://digitalcommons.wayne.edu/oa_dissertations/2325)" (2019). Wayne State University Dissertations. 2325.
 - Gustavo Pinto, Kenan Liu, Fernando Castor, Yu David Liu. "A Comprehensive Study on the Energy Efficiency of Java's Thread-Safe Collections" (2016).
 
 ## License
