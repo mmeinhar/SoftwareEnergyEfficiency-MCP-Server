@@ -9,7 +9,7 @@ public class Example1 {
         return i;
     }
 /*
-GitHub Copilot query = "#get_energy_efficiency_suggestions: Analyze this Java code"
+GitHub Copilot test query with the Agile7-Software-Energy-Efficiency-MCP-Server MCP server = "#optimize_energy_efficiency: Analyze this Java code"
 
 MCP server response = [
 Suggestion: Replace StringBuilder with String concatenation for better energy efficiency.
