@@ -109,7 +109,7 @@ If a prompt is not created properly, the MCP server's tool may not be invoked by
 The dataset is in `data/efficiency_data.json`. Add more observations as needed. Any language can be added, but it currently contains only Java data. Format:
 ```json
 [
-  {"language": "java", "component": "Variables", "observation": "..."}
+  {"lang": "java", "component": "Variables", lang_keywords": "keyword1, keyword2", "observation": "..."}
 ]
 ```
 ## Acknowledgments

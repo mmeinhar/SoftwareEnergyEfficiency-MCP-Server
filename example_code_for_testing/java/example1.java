@@ -1,26 +1,23 @@
-
 /*
-Contains inefficient Java code to test the Software Energy Efficiency MCP Server.
+Snippets of energy inefficient Java code to test the Software Energy Efficiency MCP Server.
 */
+public class Examples1 {
+    static String string1; // static is inefficient. Avoid if possible
+    static String string2 = "test"; // static is inefficient. Avoid if possible
 
-public class Example1 {
     long private example1_1() {
-        Long i = 4; // more energy efficient to use primitive long
-        return i;
-    }
-/*
-GitHub Copilot test query with the Agile7-Software-Energy-Efficiency-MCP-Server MCP server = "#optimize_energy_efficiency: Analyze this Java code"
+        Long a = 4; // wrapper-class objects are less energy efficient than primitive
+        int t_operator = (a > b) ? a : b; // ternary operator is less energy efficient than using if-then-else
+        Vector<Integer> vector = new Vector<>(); // CopyOnWriteArrayList consumes less energy than Vector for traversal operations.
 
-MCP server response = [
-Suggestion: Replace StringBuilder with String concatenation for better energy efficiency.
-Current: StringBuilder sb = new StringBuilder(); sb.append("Hello, "); sb.append("World!");
-Suggested: String result = "Hello, " + "World!";
-]
-*/
-    public static void main(String[] args) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Hello, ");
-        sb.append("World!");
-        System.out.println(sb.toString());
+        for (long j = 1; j < iter; j++) {
+            for (long k = 1; k < i ter; k++) {
+                a = j % k; // modulus operator is inefficient;
+            }
+        }
+        string1 = "hello" + "world"; // concatenation operator is inefficient
+        string1.compareTo(string2); // compareTo is less energy efficient than string.equals
+
+        return i;
     }
 }

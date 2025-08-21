@@ -3,19 +3,14 @@
 # based on code snippets using semantic search. Supports both JSON-based storage and Qdrant
 # vector database, with conditional imports to avoid Qdrant dependencies in development.
 #
-# TODO: Test the use_db=true use case
-# TODO: SSL support for Qdrant connections in production.
-# TODO: Evaluate the need for including the data file observation list to be further search filtered 
-# by another data file called "language_components.json" with "language", "component", and "keyword". 
-# For example, "{"language": "java", "component": "Loops", "keyword": "for"}". Test to see if this would
-# further narrow down the observation list returned by the search without reducing associated observations. 
-# This MCP server should not return an excess # of unecessary observations which would make the corresponding 
-# GitHub Copilot LLM prompt too big or out of context, since these observations are added to that LLM query.
+# TODO: For the use_db=true use case, recheck the code and test. Not tested yet.
+# TODO: Add support for single character operators such as the turnary operator (&) and concatination (+) characters in the code snippet.
+# TODO: Test the search code some more. The filtering is currently only ~50 accurate.
 # 
-
 import os
 import json
 import numpy as np
+import re
 from sentence_transformers import SentenceTransformer
 
 class EfficiencyRetriever:
@@ -52,7 +47,7 @@ class EfficiencyRetriever:
                 with open(data_path, 'r') as f:
                     self.data = json.load(f)
                 # Validate JSON structure
-                required_fields = {'language', 'component', 'observation'}
+                required_fields = {'lang', 'component', 'lang-keywords', 'observation'}
                 for entry in self.data:
                     if not all(field in entry for field in required_fields):
                         raise ValueError(f"JSON entry missing required fields: {entry}")
@@ -60,66 +55,103 @@ class EfficiencyRetriever:
             except json.JSONDecodeError as e:
                 raise ValueError(f"Failed to parse JSON file: {e}")
 
-    def search(self, query: str, language: str, top_k: int = 5) -> list[dict]:
+    def search(self, query: str, language: str, top_k: int = 5) -> list[str]:
         """
-        Search for energy efficiency suggestions relevant to the provided code snippet.
+        Search for energy efficiency observations relevant to the provided code snippet.
 
         :param query: The code snippet to analyze.
         :param language: The programming language of the code (e.g., 'java', 'python', 'javascript').
-        :param top_k: Maximum number of suggestions to return.
-        :return: List of dictionaries containing efficiency observations with fields 'language', 'component', 'observation'.
+        :param top_k: Maximum number of observation strings to return.
+        :return: List of observation strings for matching entries.
         :raises ValueError: If query is empty or invalid.
         """
         if not query or not isinstance(query, str):
             raise ValueError("Query must be a non-empty string.")
-
-        query_vec = self.model.encode(query)
-
-        if self.use_db:
+        
+        # Tokenize query for keywords (alphanumeric, including hyphens) and operators with spaces
+        tokens = set()
+        for match in re.findall(r'\b[\w-]+\b|\s[+\-*/%=]\s', query.lower()):
+            tokens.add(match.strip())
+        
+        # Initialize results and deduplication set
+        results = []
+        seen_observations = set()
+        
+        # URed from Qdrant db
+        if self.use_db: 
             try:
-                # Filters results to only include those matching the specified language using Qdrant's FieldCondition.
+                # Single Qdrant search to retrieve all relevant entries
                 hits = self.client.search(
                     collection_name=self.collection_name,
-                    query_vector=query_vec.tolist(),
+                    query_vector=self.model.encode(query).tolist(),
                     query_filter=self.models.Filter(
                         must=[
                             self.models.FieldCondition(
-                                key="language",
+                                key="lang",
                                 match=self.models.MatchValue(value=language)
                             )
                         ]
                     ),
-                    limit=top_k,
-                    with_payload=True,  # Ensure full payload is returned
-                    with_vectors=False,  # No need to return vectors
-                    search_params=self.models.SearchParams(exact=True)  # Force exact search to match JSON path's brute-force cosine similarity
+                    limit=max(top_k, 1000),  # Ensure all potential matches are retrieved
+                    with_payload=True,
+                    with_vectors=False,
+                    search_params=self.models.SearchParams(exact=True)
                 )
-                # Sorts hits by similarity score in descending order to match top-k ranking.
-                # Applies similarity threshold (>0.2) and validates required payload fields before inclusion.
-                results = [
-                    hit.payload for hit in sorted(hits, key=lambda x: x.score, reverse=True)
-                    if hit.score > 0.2 and all(field in hit.payload for field in ['language', 'component', 'observation'])
-                ]
-                return results
+                # Collect observations for token matches and high-similarity entries
+                for hit in hits:
+                    payload = hit.payload
+                    observation = payload.get('observation', '')
+                    if all(field in payload for field in ['lang', 'component', 'lang-keywords', 'observation']) and observation not in seen_observations:
+                        # Parse lang-keywords
+                        keywords = payload.get('lang-keywords', '').lower().split(', ')
+                        # Check if any query token matches a whole word in lang-keywords
+                        matches_token = any(
+                            any(re.search(r'\b' + re.escape(token) + r'\b', keyword) for keyword in keywords)
+                            for token in tokens
+                        )
+                        # Include if matches token or has high similarity (>= 0.1)
+                        if matches_token or hit.score >= 0.1:
+                            results.append(observation)
+                            seen_observations.add(observation)
+                            if len(results) >= top_k:
+                                break
+                return results[:top_k]
             except Exception as e:
                 raise RuntimeError(f"Qdrant search failed: {e}")
-        else: # Read the data from the JSON file
-            # Performs in-memory semantic search using precomputed vectors from JSON file for language-filtered observations.
-            # Collects indices of entries matching the specified language via list comprehension.
-            indices = [i for i, d in enumerate(self.data) if d['language'] == language]
+        # Read from JSON file
+        else:
+            # Filter entries by language
+            indices = [i for i, d in enumerate(self.data) if d['lang'] == language]
             if not indices:
                 return []
-
-            # Get the pre-computed vector embeddings of all "observation" texts from the local JSON file.
+            
+            # Compute similarities for language-filtered entries
             lang_vectors = self.vectors[indices]
-
-            # Computes cosine similarity scores between the query vector and all language-filtered observation vectors.
+            query_vec = self.model.encode(query)
             sims = np.dot(lang_vectors, query_vec) / (np.linalg.norm(lang_vectors, axis=1) * np.linalg.norm(query_vec))
-
-            # Sorts similarity scores to get indices of the top-k most similar entries in descending order.
-            top_indices = np.argsort(sims)[-top_k:][::-1]
-
-            # Selects top entries only if their similarity score exceeds the 0.2 threshold.
-            results = [self.data[indices[i]] for i in top_indices if sims[i] > 0.2]
-
-            return results
+            
+            # Collect observations for token matches and high-similarity entries
+            for i in indices:
+                observation = self.data[i]['observation']
+                if observation not in seen_observations:
+                    # Parse lang-keywords
+                    keywords = self.data[i].get('lang-keywords', '').lower().split(', ')
+                    # Check if any query token matches a whole word in lang-keywords
+                    matches_token = any(
+                        any(re.search(r'\b' + re.escape(token) + r'\b', keyword) for keyword in keywords)
+                        for token in tokens
+                    )
+                    # Include if matches token or has high similarity (>= 0.1)
+                    if matches_token or sims[indices.index(i)] >= 0.2:
+                        results.append(observation)
+                        seen_observations.add(observation)
+                        if len(results) >= top_k:
+                            break
+            
+            # Sort results by similarity to prioritize relevant matches
+            if results:
+                result_indices = [indices.index(i) for i, r in enumerate(self.data) if r['observation'] in results]
+                result_sims = [sims[i] if i < len(sims) else 0.0 for i in result_indices]
+                sorted_results = [r for _, r in sorted(zip(result_sims, results), key=lambda x: x[0], reverse=True)]
+                return sorted_results[:top_k]
+            return results[:top_k]
